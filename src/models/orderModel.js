@@ -6,16 +6,15 @@ const createShipmentTable = async () => {
       CREATE TABLE IF NOT EXISTS shipments (
         id SERIAL PRIMARY KEY,
         order_id VARCHAR(255) UNIQUE NOT NULL,
+        shipment_status VARCHAR(50),
         waybill VARCHAR(255),
-        shipping_label TEXT,
-        courier_name VARCHAR(255),
-        status VARCHAR(50),
-        request_payload JSONB,
-        response_payload JSONB,
+        delivery_address TEXT,
+        pickup_address TEXT,
+        message TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `);
+`);
     console.log('Shipments table created or already exists');
   } catch (error) {
     console.error('Error creating shipments table:', error);
@@ -23,40 +22,46 @@ const createShipmentTable = async () => {
   }
 };
 
-const saveShipmentResponse = async (orderId, requestPayload, responsePayload) => {
+const saveShipmentResponse = async (orderId, shipmentData) => {
   try {
-    const { status, waybill, shippingLabel, courierName } = responsePayload;
-    
+    const {
+      shipment_status,
+      waybill,
+      deliveryAddress,
+      pickupAddress,
+      message
+    } = shipmentData;
+
     const result = await db.query(
       `INSERT INTO shipments 
-      (order_id, status, waybill, shipping_label, courier_name, request_payload, response_payload)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+        (order_id, shipment_status, waybill, delivery_address, pickup_address, message)
+      VALUES ($1, $2, $3, $4, $5, $6)
       ON CONFLICT (order_id) 
       DO UPDATE SET 
-        status = $2, 
-        waybill = $3, 
-        shipping_label = $4, 
-        courier_name = $5,
-        response_payload = $7,
+        shipment_status = $2,
+        waybill = $3,
+        delivery_address = $4,
+        pickup_address = $5,
+        message = $6,
         updated_at = CURRENT_TIMESTAMP
       RETURNING *`,
       [
-        orderId, 
-        status, 
-        waybill || null, 
-        shippingLabel || null, 
-        courierName || null, 
-        JSON.stringify(requestPayload), 
-        JSON.stringify(responsePayload)
+        orderId,
+        shipment_status,
+        waybill,
+        deliveryAddress,
+        pickupAddress,
+        message
       ]
     );
-    
+
     return result.rows[0];
   } catch (error) {
     console.error('Error saving shipment response:', error);
     throw error;
   }
 };
+
 
 module.exports = {
   createShipmentTable,

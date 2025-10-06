@@ -7,18 +7,27 @@ const processOrder = async (orderData) => {
     const shipmentResponse = await shipmentService.createShipment(orderData);
     
     // Saving response to the database
+    const processedData = {
+      order_id: orderData.order_id,
+      shipment_status: shipmentResponse.status,
+      waybill: shipmentResponse.data.waybill,
+      deliveryAddress: shipmentResponse.data.deliveryAddress,
+      pickupAddress: shipmentResponse.data.pickupAddress,
+      message: shipmentResponse.message
+    };
+
     const savedResponse = await orderModel.saveShipmentResponse(
       orderData.order_id,
-      shipmentService.transformOrderToShipmentPayload(orderData),
-      shipmentResponse
+      processedData
     );
+
     
     return {
       order_id: orderData.order_id,
       shipment_status: shipmentResponse.status,
-      waybill: shipmentResponse.waybill,
-      shipping_label: shipmentResponse.shippingLabel,
-      courier_name: shipmentResponse.courierName,
+      waybill: shipmentResponse.data.waybill,
+      deliveryAddress: shipmentResponse.data.deliveryAddress,
+      pickupAddress: shipmentResponse.data.pickupAddress,
       message: shipmentResponse.message
     };
   } catch (error) {

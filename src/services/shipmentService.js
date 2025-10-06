@@ -36,14 +36,6 @@ const transformOrderToShipmentPayload = (orderData) => {
     },
     pickupAddressDetails: {
       name: orderData.pickup_location,
-      address1: "Pickup Address Line 1",
-      address2: "Pickup Address Line 2",
-      pincode: "110001",
-      city: "Delhi",
-      state: "Delhi",
-      country: "India",
-      phone: "9876543210",
-      email: "warehouse@example.com"
     },
     currencyCode: "INR",
     paymentMode: orderData.order_type === "PREPAID" ? "PREPAID" : "COD",
@@ -63,33 +55,34 @@ const createShipment = async (orderData) => {
     console.log(`Attempt ${attemptCount}: Calling Shipment API...`);
 
     try {
-      // Simulate actual API call
-      const response = await axios.post(
-        config.shipmentApiUrl,
-        shipmentPayload,
-        {
-          headers: {
-            'Authorization': `Bearer ${config.shipmentApiKey}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
+      // actual API call
+      // const response = await axios.post(
+      //   config.shipmentApiUrl,
+      //   shipmentPayload,
+      //   {
+      //     headers: {
+      //       'Authorization': `Bearer ${config.shipmentApiKey}`,
+      //       'Content-Type': 'application/json',
+      //     },
+      //   }
+      // );
+      
+      //Simulated API call for testing retry mechanism
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
  
       if (attemptCount < maxRetries) {
-        throw new Error("Simulated API timeout or 5xx server error");
+        throw new Error("Simulated API timeout or 500 server error");
       }
 
       // If it’s the last attempt → return predefined success
       const apiResponse = {
-        status: '200',
+        status: 'SUCCESS',
         message: 'Shipment created successfully (Simulated Final Success)',
         data: {
           waybill: 'BLZ' + Math.floor(Math.random() * 1000000),
           orderCode: shipmentPayload.Shipment.orderCode,
-          pickupAddress: shipmentPayload.pickupAddressDetails.city,
+          pickupAddress: shipmentPayload.pickupAddressDetails.name,
           deliveryAddress: shipmentPayload.deliveryAddressDetails.city,
           shipmentStatus: 'CREATED'
         }
@@ -123,7 +116,7 @@ const createShipment = async (orderData) => {
     console.log("📦 Shipment successfully created after retries:", result.data.waybill);
     return result;
   } catch (finalError) {
-    console.error("🚨 Shipment creation failed after all retries:", finalError.message);
+    console.error("Shipment creation failed after all retries:", finalError.message);
     throw new Error("Shipment creation failed after multiple retries.");
   }
 };

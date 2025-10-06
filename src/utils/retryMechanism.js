@@ -1,16 +1,9 @@
-/**
- * Executes a function with exponential backoff retry mechanism
- * @param {Function} fn - The async function to retry
- * @param {Number} maxRetries - Maximum number of retries
- * @param {Number} initialDelay - Initial delay in milliseconds
- * @param {Function} shouldRetry - Function that determines if retry should be attempted based on error
- * @returns {Promise} - Result of the function or throws an error after all retries fail
- */
+
 async function withRetry(fn, maxRetries = 3, initialDelay = 1000, shouldRetry = () => true) {
   let retries = 0;
   let lastError;
 
-  while (retries <= maxRetries) {
+  while (retries < maxRetries) {
     try {
       return await fn();
     } catch (error) {
