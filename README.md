@@ -1,6 +1,6 @@
 # Shipment API
 
-A RESTful API built with Node.js, Express, and PostgreSQL for creating and tracking shipment orders. Includes integration with a third-party Create Shipment API, retry mechanism with exponential backoff, and stores shipment responses in the database.
+A RESTful API built with Node.js, Express, and PostgreSQL for creating shipment orders. Includes integration with a third-party Create Shipment API, retry mechanism with exponential backoff, and stores shipment responses in the database.
 
 ---
 
